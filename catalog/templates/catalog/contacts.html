@@ -1,0 +1,45 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}Контакты — Каталог{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Контакты</h1>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">Как нас найти</h5>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><strong>Адрес:</strong> г. Буэнос-Айрес, ул. Примерная, 1</li>
+                    <li class="mb-2"><strong>Телефон:</strong> <a href="tel:+541100000000">+54 11 0000-0000</a></li>
+                    <li class="mb-2"><strong>Email:</strong> <a href="mailto:info@example.com">info@example.com</a></li>
+                    <li><strong>Режим работы:</strong> пн–пт, 9:00–18:00</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">Напишите нам</h5>
+                <form>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Имя</label>
+                        <input type="text" class="form-control" id="name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Сообщение</label>
+                        <textarea class="form-control" id="message" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Отправить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

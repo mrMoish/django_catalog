@@ -1,0 +1,40 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}Главная — Каталог{% endblock %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-5 fw-bold">Добро пожаловать в каталог</h1>
+    <p class="lead text-muted col-lg-8 mx-auto">
+        Здесь собраны лучшие товары по выгодным ценам. Выбирайте, сравнивайте и заказывайте.
+    </p>
+    <a href="{% url 'catalog:contacts' %}" class="btn btn-primary btn-lg">Связаться с нами</a>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="col">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Широкий ассортимент</h5>
+                <p class="card-text">Тысячи позиций в разных категориях — найдётся всё необходимое.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Честные цены</h5>
+                <p class="card-text">Работаем напрямую с поставщиками, поэтому держим цены ниже рынка.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Быстрая доставка</h5>
+                <p class="card-text">Отправляем заказы в день оформления и доставляем по всей стране.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
