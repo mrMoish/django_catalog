@@ -1,0 +1,11 @@
+[
+  {"model": "catalog.category", "pk": 1, "fields": {"name": "Смартфоны", "description": "Мобильные телефоны и аксессуары"}},
+  {"model": "catalog.category", "pk": 2, "fields": {"name": "Ноутбуки", "description": "Портативные компьютеры для работы и игр"}},
+  {"model": "catalog.category", "pk": 3, "fields": {"name": "Наушники", "description": "Проводные и беспроводные наушники"}},
+  {"model": "catalog.product", "pk": 1, "fields": {"name": "Смартфон Alpha X", "description": "6.5\" AMOLED, 128 ГБ", "image": null, "category": 1, "price": "29990.00", "created_at": "2026-01-10T10:00:00Z", "updated_at": "2026-01-10T10:00:00Z"}},
+  {"model": "catalog.product", "pk": 2, "fields": {"name": "Смартфон Beta Mini", "description": "Компактный, 64 ГБ", "image": null, "category": 1, "price": "15990.00", "created_at": "2026-01-11T10:00:00Z", "updated_at": "2026-01-11T10:00:00Z"}},
+  {"model": "catalog.product", "pk": 3, "fields": {"name": "Ноутбук Pro 15", "description": "Intel i7, 16 ГБ ОЗУ, SSD 512 ГБ", "image": null, "category": 2, "price": "79990.00", "created_at": "2026-01-12T10:00:00Z", "updated_at": "2026-01-12T10:00:00Z"}},
+  {"model": "catalog.product", "pk": 4, "fields": {"name": "Ноутбук Air 13", "description": "Лёгкий ультрабук, 8 ГБ ОЗУ", "image": null, "category": 2, "price": "54990.00", "created_at": "2026-01-13T10:00:00Z", "updated_at": "2026-01-13T10:00:00Z"}},
+  {"model": "catalog.product", "pk": 5, "fields": {"name": "Наушники Sound Max", "description": "Беспроводные, шумоподавление", "image": null, "category": 3, "price": "7990.00", "created_at": "2026-01-14T10:00:00Z", "updated_at": "2026-01-14T10:00:00Z"}},
+  {"model": "catalog.product", "pk": 6, "fields": {"name": "Наушники Basic In-Ear", "description": "Проводные вкладыши", "image": null, "category": 3, "price": "990.00", "created_at": "2026-01-15T10:00:00Z", "updated_at": "2026-01-15T10:00:00Z"}}
+]
