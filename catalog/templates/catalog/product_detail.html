@@ -1,0 +1,28 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}{{ product.name }} — Каталог{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'catalog:home' %}">Главная</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+    </ol>
+</nav>
+
+<div class="row g-5">
+    <div class="col-md-6">
+        {% include 'catalog/includes/product_image.html' with product=product mode='detail' %}
+    </div>
+    <div class="col-md-6">
+        <h1 class="mb-3">{{ product.name }}</h1>
+        <p class="text-muted mb-1">Категория: {{ product.category.name }}</p>
+        <p class="display-6 fw-bold my-3">{{ product.price }} ₽</p>
+
+        <h5>Описание</h5>
+        <p class="mb-4">{{ product.description|default:"Описание отсутствует."|linebreaksbr }}</p>
+
+        <a href="{% url 'catalog:home' %}" class="btn btn-outline-secondary">&larr; Назад в каталог</a>
+    </div>
+</div>
+{% endblock %}
