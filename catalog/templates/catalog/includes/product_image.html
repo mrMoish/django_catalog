@@ -1,0 +1,15 @@
+{% comment %}
+Изображение товара или заглушка.
+Параметры: product, mode ("card" — для списка, "detail" — для страницы товара).
+{% endcomment %}
+{% if product.image %}
+    {% if mode == "detail" %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-detail-img rounded">
+    {% else %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card-img-top product-card-img">
+    {% endif %}
+{% else %}
+    <div class="{% if mode == 'detail' %}product-detail-placeholder{% else %}product-img-placeholder{% endif %}">
+        Нет изображения
+    </div>
+{% endif %}
