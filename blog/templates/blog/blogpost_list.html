@@ -1,0 +1,33 @@
+{% extends "catalog/base.html" %}
+
+{% block title %}Блог{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1>Блог</h1>
+  <a class="btn btn-primary" href="{% url 'blog:create' %}">Новая запись</a>
+</div>
+<div class="row row-cols-1 row-cols-md-3 g-4">
+  {% for post in object_list %}
+  <div class="col">
+    <div class="card h-100">
+      {% if post.preview %}
+      <img src="{{ post.preview.url }}" class="card-img-top" alt="{{ post.title }}">
+      {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{ post.title }}</h5>
+        <p class="card-text">{{ post.content|truncatechars:100 }}</p>
+        <p class="text-muted small">{{ post.created_at|date:"d.m.Y" }} · просмотров: {{ post.views_count }}</p>
+      </div>
+      <div class="card-footer">
+        <a href="{% url 'blog:detail' post.pk %}" class="btn btn-sm btn-outline-primary">Читать</a>
+        <a href="{% url 'blog:update' post.pk %}" class="btn btn-sm btn-outline-secondary">Изменить</a>
+        <a href="{% url 'blog:delete' post.pk %}" class="btn btn-sm btn-outline-danger">Удалить</a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p>Пока нет опубликованных записей.</p>
+  {% endfor %}
+</div>
+{% endblock %}
