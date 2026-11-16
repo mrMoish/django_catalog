@@ -22,11 +22,7 @@
         <h5>Описание</h5>
         <p class="mb-4">{{ product.description|default:"Описание отсутствует."|linebreaksbr }}</p>
 
-        <div class="d-flex flex-wrap gap-2">
-            <a href="{% url 'catalog:home' %}" class="btn btn-outline-secondary">&larr; Назад в каталог</a>
-            <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-primary">Редактировать</a>
-            <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-outline-danger">Удалить</a>
-        </div>
+        <a href="{% url 'catalog:home' %}" class="btn btn-outline-secondary">&larr; Назад в каталог</a>
     </div>
 </div>
 {% endblock %}
