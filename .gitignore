@@ -2,8 +2,6 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
-build/
-dist/
 
 # Виртуальное окружение
 .venv/
@@ -17,20 +15,10 @@ media/
 staticfiles/
 local_settings.py
 
-# Секреты (шаблон .env.example хранится в репозитории)
+# Секреты
 .env
-.env.*
-!.env.example
-
-# Тесты и кэш инструментов
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
-.coverage
-htmlcov/
 
 # IDE и ОС
 .idea/
 .vscode/
 .DS_Store
-Thumbs.db
