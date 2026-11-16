@@ -7,7 +7,8 @@
 - `config/` — настройки проекта и корневая маршрутизация
 - `catalog/` — приложение с контроллерами и шаблонами (`templates/catalog/`)
   - `templates/catalog/base.html` — базовый шаблон (шапка, подвал, стили, блоки `title`, `content`, `extra_css`, `extra_js`)
-  - `templates/catalog/includes/` — подшаблоны: главное меню (`navbar.html`), подвал (`footer.html`), изображение товара (`product_image.html`)
+  - `forms.py` — форма продукта `ProductForm` (валидация и стилизация полей)
+  - `templates/catalog/includes/` — подшаблоны: главное меню (`navbar.html`), подвал (`footer.html`), изображение товара (`product_image.html`), поле формы (`form_field.html`)
   - `static/catalog/css/style.css` — общие стили
 
 ## Страницы
@@ -17,6 +18,16 @@
 | `/`                   | `home`           | Главная: список товаров       |
 | `/products/<int:pk>/` | `product_detail` | Подробная информация о товаре |
 | `/contacts/`          | `contacts`       | Контактная информация         |
+| `/products/create/`   | `product_create` | Создание продукта             |
+| `/products/<int:pk>/update/` | `product_update` | Редактирование продукта |
+| `/products/<int:pk>/delete/` | `product_delete` | Удаление продукта (с подтверждением) |
+
+## Формы и валидация
+
+- Форма `ProductForm` построена на `django.forms.ModelForm`.
+- Запрещённые слова вынесены в константу `FORBIDDEN_WORDS` (`catalog/forms.py`); название и описание проверяются без учёта регистра (`clean_name`, `clean_description`).
+- Цена проверяется в `clean_price`: отрицательное значение вызывает `ValidationError` с понятным сообщением.
+- Bootstrap-классы полям назначаются в `__init__` (`form-control`, `form-select`, `form-check-input` для чекбоксов); поля с ошибками подсвечиваются `is-invalid`.
 
 ## Запуск
 

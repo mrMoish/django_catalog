@@ -42,3 +42,9 @@
     background-color: #e9ecef;
     color: #6c757d;
 }
+
+/* Превью текущего изображения в форме продукта */
+.product-form-preview {
+    max-height: 160px;
+    object-fit: contain;
+}
