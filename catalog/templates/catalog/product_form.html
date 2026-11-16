@@ -1,0 +1,57 @@
+{% extends 'catalog/base.html' %}
+
+{% block title %}{% if object %}Редактирование продукта{% else %}Новый продукт{% endif %} — Каталог{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'catalog:home' %}">Главная</a></li>
+        {% if object %}
+        <li class="breadcrumb-item"><a href="{% url 'catalog:product_detail' object.pk %}">{{ object.name }}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Редактирование</li>
+        {% else %}
+        <li class="breadcrumb-item active" aria-current="page">Новый продукт</li>
+        {% endif %}
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h1 class="h3 mb-4">{% if object %}Редактирование продукта{% else %}Новый продукт{% endif %}</h1>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if object and object.image %}
+                    <div class="mb-3">
+                        <div class="form-label fw-semibold">Текущее изображение</div>
+                        <img src="{{ object.image.url }}" alt="{{ object.name }}"
+                             class="img-thumbnail product-form-preview">
+                    </div>
+                    {% endif %}
+
+                    {% for field in form %}
+                        {% include 'catalog/includes/form_field.html' with field=field %}
+                    {% endfor %}
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            {% if object %}Сохранить{% else %}Создать{% endif %}
+                        </button>
+                        <a href="{% if object %}{% url 'catalog:product_detail' object.pk %}{% else %}{% url 'catalog:home' %}{% endif %}"
+                           class="btn btn-outline-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
