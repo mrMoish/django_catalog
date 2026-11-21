@@ -1,4 +1,6 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse, reverse_lazy
@@ -14,6 +16,7 @@ def home(request):
     return render(request, "catalog/home.html", {"products": products})
 
 
+@login_required
 def product_detail(request, pk):
     """Контроллер страницы с подробной информацией о товаре."""
     product = get_object_or_404(Product, pk=pk)
@@ -25,7 +28,7 @@ def contacts(request):
     return render(request, "catalog/contacts.html")
 
 
-class ProductCreateView(SuccessMessageMixin, CreateView):
+class ProductCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     """Создание продукта."""
 
     model = Product
@@ -37,7 +40,7 @@ class ProductCreateView(SuccessMessageMixin, CreateView):
         return reverse("catalog:product_detail", kwargs={"pk": self.object.pk})
 
 
-class ProductUpdateView(SuccessMessageMixin, UpdateView):
+class ProductUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     """Редактирование продукта."""
 
     model = Product
@@ -49,7 +52,7 @@ class ProductUpdateView(SuccessMessageMixin, UpdateView):
         return reverse("catalog:product_detail", kwargs={"pk": self.object.pk})
 
 
-class ProductDeleteView(DeleteView):
+class ProductDeleteView(LoginRequiredMixin, DeleteView):
     """Удаление продукта с подтверждением."""
 
     model = Product

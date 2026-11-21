@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from catalog.models import Category, Product
+from users.models import User
 
 
 class CatalogPagesTests(TestCase):
@@ -14,6 +15,10 @@ class CatalogPagesTests(TestCase):
             category=cls.category,
             price="29990.00",
         )
+
+    def setUp(self):
+        # Страницы управления продуктами доступны только авторизованным.
+        self.client.force_login(User.objects.create_user("tester@example.com", "Str0ng-pass-123"))
 
     def test_product_detail_url(self):
         self.assertEqual(
@@ -142,6 +147,10 @@ class ProductCrudTests(TestCase):
         cls.product = Product.objects.create(
             name="Ноутбук Pro", description="Мощный", category=cls.category, price="999.00"
         )
+
+    def setUp(self):
+        # Страницы управления продуктами доступны только авторизованным.
+        self.client.force_login(User.objects.create_user("tester@example.com", "Str0ng-pass-123"))
 
     def payload(self, **overrides):
         data = {
