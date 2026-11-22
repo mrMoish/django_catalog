@@ -1,8 +1,11 @@
+from django.contrib.auth.models import Group
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 
 from catalog.models import Category, Product
 from users.models import User
+
 
 
 class CatalogPagesTests(TestCase):
@@ -14,6 +17,7 @@ class CatalogPagesTests(TestCase):
             description="Х" * 150,
             category=cls.category,
             price="29990.00",
+            is_published=True,
         )
 
     def setUp(self):
@@ -144,13 +148,18 @@ class ProductCrudTests(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.category = Category.objects.create(name="Ноутбуки")
+        cls.owner = User.objects.create_user("owner@example.com", "Str0ng-pass-123")
         cls.product = Product.objects.create(
-            name="Ноутбук Pro", description="Мощный", category=cls.category, price="999.00"
+            name="Ноутбук Pro",
+            description="Мощный",
+            category=cls.category,
+            price="999.00",
+            is_published=True,
+            owner=cls.owner,
         )
 
     def setUp(self):
-        # Страницы управления продуктами доступны только авторизованным.
-        self.client.force_login(User.objects.create_user("tester@example.com", "Str0ng-pass-123"))
+        self.client.force_login(self.owner)
 
     def payload(self, **overrides):
         data = {
@@ -175,6 +184,8 @@ class ProductCrudTests(TestCase):
             response, reverse("catalog:product_detail", args=[created.pk])
         )
         self.assertEqual(str(created.price), "10.50")
+        self.assertEqual(created.owner, self.owner)
+        self.assertFalse(created.is_published)
 
     def test_create_with_forbidden_word_shows_error(self):
         response = self.client.post(
@@ -229,3 +240,180 @@ class ProductCrudTests(TestCase):
         self.client.post(url, self.payload(clear_image="on"))
         self.product.refresh_from_db()
         self.assertFalse(self.product.image)
+
+
+class ProductPermissionsTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("create_moderator_group", verbosity=0)
+        category = Category.objects.create(name="Ноутбуки")
+        cls.owner = User.objects.create_user("owner@example.com", "Str0ng-pass-123")
+        cls.stranger = User.objects.create_user("stranger@example.com", "Str0ng-pass-123")
+        cls.moderator = User.objects.create_user("moderator@example.com", "Str0ng-pass-123")
+        cls.moderator.groups.add(Group.objects.get(name="Модератор продуктов"))
+        cls.product = Product.objects.create(
+            name="Ноутбук Pro",
+            description="Мощный",
+            category=category,
+            price="999.00",
+            is_published=True,
+            owner=cls.owner,
+        )
+        cls.category = category
+
+    def url(self, name):
+        return reverse(f"catalog:{name}", args=[self.product.pk])
+
+    def payload(self):
+        return {
+            "name": "Ноутбук Pro 2",
+            "description": "Мощный",
+            "category": self.category.pk,
+            "price": "999.00",
+            "is_published": "on",
+        }
+
+    # --- группа ---
+
+    def test_group_has_exactly_two_permissions(self):
+        group = Group.objects.get(name="Модератор продуктов")
+        self.assertEqual(
+            set(group.permissions.values_list("codename", flat=True)),
+            {"can_unpublish_product", "delete_product"},
+        )
+
+    def test_group_command_is_idempotent(self):
+        call_command("create_moderator_group", verbosity=0)
+        self.assertEqual(Group.objects.filter(name="Модератор продуктов").count(), 1)
+        self.assertEqual(
+            Group.objects.get(name="Модератор продуктов").permissions.count(), 2
+        )
+
+    # --- владелец ---
+
+    def test_new_product_defaults_to_unpublished(self):
+        product = Product.objects.create(
+            name="Тест", category=self.category, price="1.00"
+        )
+        self.assertFalse(product.is_published)
+
+    def test_create_requires_login(self):
+        response = self.client.get(reverse("catalog:product_create"))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/users/login/", response["Location"])
+
+    def test_owner_is_set_to_current_user_and_cannot_be_forged(self):
+        self.client.force_login(self.stranger)
+        data = self.payload()
+        data["owner"] = self.owner.pk
+        self.client.post(reverse("catalog:product_create"), data)
+        created = Product.objects.get(name="Ноутбук Pro 2")
+        self.assertEqual(created.owner, self.stranger)
+
+    # --- редактирование ---
+
+    def test_anonymous_redirected_to_login(self):
+        for name in ("product_update", "product_delete"):
+            response = self.client.get(self.url(name))
+            self.assertEqual(response.status_code, 302)
+            self.assertIn("/users/login/", response["Location"])
+
+    def test_stranger_gets_403_on_update_and_delete(self):
+        self.client.force_login(self.stranger)
+        for name in ("product_update", "product_delete"):
+            self.assertEqual(self.client.get(self.url(name)).status_code, 403)
+        self.assertEqual(
+            self.client.post(self.url("product_update"), self.payload()).status_code,
+            403,
+        )
+        self.assertEqual(self.client.post(self.url("product_delete")).status_code, 403)
+        self.assertTrue(Product.objects.filter(pk=self.product.pk).exists())
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.name, "Ноутбук Pro")
+
+    def test_owner_can_update_and_delete(self):
+        self.client.force_login(self.owner)
+        self.assertEqual(
+            self.client.post(self.url("product_update"), self.payload()).status_code,
+            302,
+        )
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.name, "Ноутбук Pro 2")
+        self.assertEqual(self.client.post(self.url("product_delete")).status_code, 302)
+        self.assertFalse(Product.objects.filter(pk=self.product.pk).exists())
+
+    def test_moderator_can_update_and_delete_foreign_product(self):
+        self.client.force_login(self.moderator)
+        self.assertEqual(self.client.get(self.url("product_update")).status_code, 200)
+        self.assertEqual(
+            self.client.post(self.url("product_update"), self.payload()).status_code,
+            302,
+        )
+        self.assertEqual(self.client.post(self.url("product_delete")).status_code, 302)
+        self.assertFalse(Product.objects.filter(pk=self.product.pk).exists())
+
+    # --- снятие с публикации ---
+
+    def test_unpublish_requires_permission(self):
+        for user in (None, self.stranger, self.owner):
+            self.client.logout()
+            if user:
+                self.client.force_login(user)
+            response = self.client.post(self.url("product_unpublish"))
+            self.assertIn(response.status_code, (302, 403))
+            self.product.refresh_from_db()
+            self.assertTrue(self.product.is_published)
+
+    def test_moderator_can_unpublish(self):
+        self.client.force_login(self.moderator)
+        response = self.client.post(self.url("product_unpublish"))
+        self.assertRedirects(response, self.url("product_detail"))
+        self.product.refresh_from_db()
+        self.assertFalse(self.product.is_published)
+
+    def test_unpublish_rejects_get(self):
+        self.client.force_login(self.moderator)
+        self.assertEqual(self.client.get(self.url("product_unpublish")).status_code, 405)
+
+    # --- кнопки в шаблоне ---
+
+    def test_buttons_for_owner(self):
+        self.client.force_login(self.owner)
+        response = self.client.get(self.url("product_detail"))
+        self.assertContains(response, self.url("product_update"))
+        self.assertContains(response, self.url("product_delete"))
+        self.assertNotContains(response, self.url("product_unpublish"))
+
+    def test_buttons_for_moderator(self):
+        self.client.force_login(self.moderator)
+        response = self.client.get(self.url("product_detail"))
+        self.assertContains(response, self.url("product_update"))
+        self.assertContains(response, self.url("product_delete"))
+        self.assertContains(response, self.url("product_unpublish"))
+
+    def test_no_buttons_for_stranger(self):
+        self.client.force_login(self.stranger)
+        response = self.client.get(self.url("product_detail"))
+        self.assertNotContains(response, self.url("product_update"))
+        self.assertNotContains(response, self.url("product_delete"))
+        self.assertNotContains(response, self.url("product_unpublish"))
+
+    # --- видимость ---
+
+    def test_unpublished_product_visibility(self):
+        self.product.is_published = False
+        self.product.save()
+        home = reverse("catalog:home")
+        detail = self.url("product_detail")
+
+        self.assertNotContains(self.client.get(home), self.product.name)
+
+        self.client.force_login(self.stranger)
+        self.assertEqual(self.client.get(detail).status_code, 404)
+
+        self.client.force_login(self.owner)
+        self.assertEqual(self.client.get(detail).status_code, 200)
+        self.assertContains(self.client.get(home), self.product.name)
+
+        self.client.force_login(self.moderator)
+        self.assertEqual(self.client.get(detail).status_code, 200)

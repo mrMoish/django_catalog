@@ -17,6 +17,9 @@
     <div class="col-md-6">
         <h1 class="mb-3">{{ product.name }}</h1>
         <p class="text-muted mb-1">Категория: {{ product.category.name }}</p>
+        {% if not product.is_published %}
+        <span class="badge text-bg-secondary mb-2">Не опубликован</span>
+        {% endif %}
         <p class="display-6 fw-bold my-3">{{ product.price }} ₽</p>
 
         <h5>Описание</h5>
@@ -24,8 +27,18 @@
 
         <div class="d-flex flex-wrap gap-2">
             <a href="{% url 'catalog:home' %}" class="btn btn-outline-secondary">&larr; Назад в каталог</a>
+            {% if can_edit %}
             <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-primary">Редактировать</a>
+            {% endif %}
+            {% if can_delete %}
             <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-outline-danger">Удалить</a>
+            {% endif %}
+            {% if can_unpublish %}
+            <form method="post" action="{% url 'catalog:product_unpublish' product.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-warning">Снять с публикации</button>
+            </form>
+            {% endif %}
         </div>
     </div>
 </div>

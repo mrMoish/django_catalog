@@ -118,7 +118,11 @@ class LoginTests(TestCase):
 class AccessControlTests(TestCase):
     def setUp(self):
         category = Category.objects.create(name="Тест")
-        self.product = Product.objects.create(name="Товар", category=category, price=10)
+        self.user = User.objects.create_user("u@example.com", "Str0ng-pass-123")
+        # Изменять и удалять продукт может только владелец.
+        self.product = Product.objects.create(
+            name="Товар", category=category, price=10, owner=self.user, is_published=True
+        )
         self.protected = [
             reverse("catalog:product_create"),
             reverse("catalog:product_detail", args=[self.product.pk]),
@@ -142,7 +146,6 @@ class AccessControlTests(TestCase):
         self.assertEqual(self.client.get(reverse("catalog:home")).status_code, 200)
 
     def test_authenticated_has_access(self):
-        User.objects.create_user("u@example.com", "Str0ng-pass-123")
         self.client.login(username="u@example.com", password="Str0ng-pass-123")
         for url in self.protected:
             with self.subTest(url=url):
