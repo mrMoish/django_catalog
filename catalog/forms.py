@@ -57,7 +57,7 @@ class ProductForm(StyledFormMixin, forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ("name", "description", "image", "category", "price")
+        fields = ("name", "description", "image", "category", "price", "is_published")
         widgets = {
             "name": forms.TextInput(attrs={"placeholder": "Введите наименование"}),
             "description": forms.Textarea(
@@ -110,3 +110,4 @@ class ProductForm(StyledFormMixin, forms.ModelForm):
         if commit:
             product.save()
         return product
+
